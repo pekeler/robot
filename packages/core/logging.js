@@ -1,6 +1,6 @@
-import { d } from './machine.js';
+import { d } from "./machine.js";
 
-d._onEnter = function(machine, to, state, prevState, event) {
+d._onEnter = function (machine, to, state, prevState, event) {
   console.log(`Enter state ${to}`);
   console.groupCollapsed(`Details:`);
   console.log(`Machine`, machine);
@@ -14,4 +14,4 @@ d._onEnter = function(machine, to, state, prevState, event) {
   }
 
   console.groupEnd();
-}
+};
