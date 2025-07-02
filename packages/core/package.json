@@ -3,13 +3,11 @@
   "version": "1.1.1",
   "description": "A functional, immutable Finite State Machine library",
   "main": "dist/machine.js",
-  "types": "./index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/machine.js",
       "import": "./machine.js",
-      "default": "./machine.js",
-      "types": "./index.d.ts"
+      "default": "./machine.js"
     },
     "./debug": {
       "require": "./dist/debug.js",
@@ -21,15 +19,13 @@
     "dist/",
     "debug.js",
     "logging.js",
-    "machine.js",
-    "index.d.ts"
+    "machine.js"
   ],
   "scripts": {
     "minify": "wireit",
     "bundlesize": "wireit",
     "server": "wireit",
     "test": "wireit",
-    "test:types": "wireit",
     "test:browser": "wireit",
     "build:cjs": "wireit",
     "build": "wireit"
@@ -77,13 +73,8 @@
     },
     "test": {
       "dependencies": [
-        "test:types",
         "test:browser"
       ]
-    },
-    "test:types": {
-      "command": "tsc -p test/types/tsconfig.json",
-      "files": []
     },
     "test:browser": {
       "command": "node-qunit-puppeteer http://localhost:1965/test/test.html 10000",
