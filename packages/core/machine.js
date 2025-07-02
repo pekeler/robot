@@ -76,17 +76,30 @@ function transitionsToMap(transitions) {
   return m;
 }
 
-let stateType = { enter: identity };
+function stateEnter(machine, service, event) {
+  service.context = this.reducers.call(service, service.context, event);
+  if (this.immediates) {
+    return enterImmediate.call(this, machine, service, event);
+  }
+  return machine;
+}
+let stateType = { enter: stateEnter };
+
 export function state(...args) {
   let transitions = filter(transitionType, args);
   let immediates = filter(immediateType, args);
+  let reducers = stack(
+    filter(reduceType, args).map((t) => t.fn),
+    identity,
+    callForward
+  );
   let desc = {
     final: valueEnumerable(args.length === 0),
     transitions: valueEnumerable(transitionsToMap(transitions)),
+    reducers: valueEnumerable(reducers),
   };
   if (immediates.length) {
     desc.immediates = valueEnumerable(immediates);
-    desc.enter = valueEnumerable(enterImmediate);
   }
   return create(stateType, desc);
 }
