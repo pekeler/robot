@@ -76,8 +76,11 @@ function transitionsToMap(transitions) {
   return m;
 }
 
-function stateEnter(machine, service, event) {
-  service.context = this.reducers.call(service, service.context, event);
+function stateEnter(machine, service, event, previousStateName) {
+  // Only run state reducers if entering a new state (not re-entering the same state)
+  if (machine.current !== previousStateName) {
+    service.context = this.reducers.call(service, service.context, event);
+  }
   if (this.immediates) {
     return enterImmediate.call(this, machine, service, event);
   }
@@ -201,7 +204,8 @@ function transitionTo(service, machine, fromEvent, candidates) {
         d._onEnter(machine, to, service.context, context, fromEvent);
       let state = newMachine.state.value;
       service.machine = newMachine;
-      let ret = state.enter(newMachine, service, fromEvent);
+      // Pass the previous state name to the enter function
+      let ret = state.enter(newMachine, service, fromEvent, machine.current);
       service.onChange(service);
       return ret;
     }
@@ -237,6 +241,7 @@ export function interpret(machine, onChange, initialContext, event) {
     onChange: valueEnumerable(onChange),
   });
   s.send = s.send.bind(s);
-  s.machine = s.machine.state.value.enter(s.machine, s, event);
+  // For initial entry, there is no previous state, so reducer should always run.
+  s.machine = s.machine.state.value.enter(s.machine, s, event, undefined);
   return s;
 }

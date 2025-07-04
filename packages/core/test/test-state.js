@@ -115,6 +115,30 @@ QUnit.module("States", (hooks) => {
     }
   );
 
+  QUnit.test("State reducer doesn't run on re-entry", (assert) => {
+    let machine = createMachine({
+      one: state(
+        transition(
+          "go",
+          "two",
+          reduce((ctx) => ({ ...ctx, count: 0 }))
+        )
+      ),
+      two: state(
+        reduce((ctx) => ({ ...ctx, count: ctx.count + 1 })),
+        transition("go", "two")
+      ),
+    });
+    let service = interpret(machine, () => {});
+    service.send("go");
+    service.send("go");
+    assert.equal(
+      service.context.count,
+      1,
+      "state reducer didn't run on re-entry"
+    );
+  });
+
   QUnit.test("State reducer receives event argument", (assert) => {
     let machine = createMachine({
       one: state(transition("go", "two")),
@@ -186,12 +210,16 @@ QUnit.module("States", (hooks) => {
         transition("go", "two")
       ),
       two: state(
-        reduce((ctx) => ({ ...ctx, count: ctx.count + 1 })),
+        reduce((ctx) => ({ ...ctx, count: 1 })),
         immediate(
           "three",
           guard((ctx) => ctx.count === 2)
         ),
-        transition("go", "two")
+        transition(
+          "go",
+          "two",
+          reduce((ctx) => ({ ...ctx, count: ctx.count + 1 }))
+        )
       ),
       three: state(reduce((ctx) => ({ ...ctx, done: true }))),
     });
